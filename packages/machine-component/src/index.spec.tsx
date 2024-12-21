@@ -1,7 +1,7 @@
-import { test } from "vitest";
-import { act, render } from "@testing-library/react";
-import { createMachineComponent } from "./index";
-import { createActor, createMachine } from "xstate";
+import { test } from "vitest"
+import { act, render } from "@testing-library/react"
+import { createMachineComponent } from "./index"
+import { createActor, createMachine } from "xstate"
 
 const testMachine = createMachine({
   initial: "a",
@@ -22,10 +22,10 @@ const testMachine = createMachine({
       },
     },
   },
-});
+})
 
-const actorRef = createActor(testMachine);
-actorRef.start();
+const actorRef = createActor(testMachine)
+actorRef.start()
 
 const TestComponent = createMachineComponent({
   states: {
@@ -39,24 +39,24 @@ const TestComponent = createMachineComponent({
       Component: () => <div>C</div>,
     },
   },
-});
+})
 
 test("renders the correct component", async () => {
-  const screen = render(<TestComponent actorRef={actorRef} />);
-  screen.getByText("A");
+  const screen = render(<TestComponent actorRef={actorRef} />)
+  screen.getByText("A")
 
   act(() => {
-    actorRef.send({ type: "NEXT" });
-  });
-  screen.getByText("B");
+    actorRef.send({ type: "NEXT" })
+  })
+  screen.getByText("B")
 
   act(() => {
-    actorRef.send({ type: "NEXT" });
-  });
-  screen.getByText("C");
+    actorRef.send({ type: "NEXT" })
+  })
+  screen.getByText("C")
 
   act(() => {
-    actorRef.send({ type: "NEXT" });
-  });
-  screen.getByText("A");
-});
+    actorRef.send({ type: "NEXT" })
+  })
+  screen.getByText("A")
+})

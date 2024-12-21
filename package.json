@@ -4,7 +4,9 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsup packages/machine-component/src/index.tsx --format esm,cjs --dts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier --write .",
+    "format-check": "prettier --check ."
   },
   "repository": {
     "type": "git",
@@ -20,5 +22,9 @@
   "workspaces": [
     "packages/*",
     "examples"
-  ]
+  ],
+  "devDependencies": {
+    "eslint": "^9.17.0",
+    "prettier": "^3.4.2"
+  }
 }

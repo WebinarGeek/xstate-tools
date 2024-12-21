@@ -1,13 +1,13 @@
-import "./App.css";
-import { CountMachine, countMachine } from "./machine";
-import { useActorRef, useSelector } from "@xstate/react";
-import { createMachineComponent } from "@webinargeek/machine-component";
+import "./App.css"
+import { CountMachine, countMachine } from "./machine"
+import { useActorRef, useSelector } from "@xstate/react"
+import { createMachineComponent } from "@webinargeek/machine-component"
 
 const Count = createMachineComponent<CountMachine>({
   states: {
     a: {
       Component: ({ actorRef }) => {
-        const count = useSelector(actorRef, (state) => state.context.count);
+        const count = useSelector(actorRef, (state) => state.context.count)
 
         return (
           <>
@@ -22,7 +22,7 @@ const Count = createMachineComponent<CountMachine>({
               </button>
             </div>
           </>
-        );
+        )
       },
     },
     b: {
@@ -35,16 +35,16 @@ const Count = createMachineComponent<CountMachine>({
       ),
     },
   },
-});
+})
 
 function App() {
-  const countActor = useActorRef(countMachine);
+  const countActor = useActorRef(countMachine)
   return (
     <>
       <h1>Vite + React</h1>
       <Count actorRef={countActor} />
     </>
-  );
+  )
 }
 
-export default App;
+export default App

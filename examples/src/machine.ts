@@ -1,4 +1,4 @@
-import { assign, setup } from "xstate";
+import { assign, setup } from "xstate"
 
 export const countMachine = setup({}).createMachine({
   context: {
@@ -26,6 +26,6 @@ export const countMachine = setup({}).createMachine({
       },
     },
   },
-});
+})
 
-export type CountMachine = typeof countMachine;
+export type CountMachine = typeof countMachine
