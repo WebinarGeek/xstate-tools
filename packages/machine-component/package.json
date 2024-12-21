@@ -1,0 +1,26 @@
+{
+  "name": "@webinargeek/machine-component",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    "import": "./dist/index.js",
+    "require": "./dist/index.cjs"
+  },
+  "scripts": {
+    "build": "tsup src/index.tsx --format esm,cjs --dts",
+    "dev": "tsup src/index.tsx --watch --format esm,cjs --dts"
+  },
+  "peerDependencies": {
+    "@xstate/react": "^5.0.0",
+    "react": "^18.0.0",
+    "xstate": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "typescript": "^5.0.0",
+    "tsup": "^8.3.5"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "@webinargeek/xstate-tools",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsup packages/machine-component/src/index.tsx --format esm,cjs --dts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WebinarGeek/xstate-tools.git"
+  },
+  "author": "WebinarGeek",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/WebinarGeek/xstate-tools/issues"
+  },
+  "homepage": "https://github.com/WebinarGeek/xstate-tools#readme",
+  "description": "A collection of tools for working with XState",
+  "workspaces": [
+    "packages/*",
+    "examples"
+  ]
+}
