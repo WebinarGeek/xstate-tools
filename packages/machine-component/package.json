@@ -1,26 +1,57 @@
 {
   "name": "@webinargeek/machine-component",
-  "version": "1.0.0",
+  "version": "0.0.1",
+  "description": "A tool for creating react components which render based on the current state of an XState state machine",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "type": "module",
   "exports": {
     "import": "./dist/index.js",
     "require": "./dist/index.cjs"
   },
+  "types": "dist/index.d.ts",
+  "file": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsup src/index.tsx --format esm,cjs --dts",
-    "dev": "tsup src/index.tsx --watch --format esm,cjs --dts"
+    "dev": "tsup src/index.tsx --watch --format esm,cjs --dts",
+    "prepublishOnly": "npm run build",
+    "test": "vitest"
+  },
+  "keywords": [
+    "xstate",
+    "react",
+    "state-machine"
+  ],
+  "author": "nick@webinargeek.com",
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WebinarGeek/xstate-tools.git"
+  },
+  "bugs": {
+    "url": "https://github.com/WebinarGeek/xstate-tools/issues"
+  },
+  "homepage": "https://github.com/WebinarGeek/xstate-tools#readme",
+  "publishConfig": {
+    "access": "public"
   },
   "peerDependencies": {
     "@xstate/react": "^5.0.0",
     "react": "^18.0.0",
+    "react-dom": "^18.0.0",
     "xstate": "^5.0.0"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
+    "jsdom": "^25.0.1",
+    "tsup": "^8.3.5",
     "typescript": "^5.0.0",
-    "tsup": "^8.3.5"
+    "vitest": "^2.1.8"
   }
 }
