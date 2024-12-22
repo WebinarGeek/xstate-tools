@@ -44,9 +44,6 @@
     "xstate": "^5.0.0"
   },
   "devDependencies": {
-    "@testing-library/dom": "^10.4.0",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.1.0",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "jsdom": "^25.0.1",
