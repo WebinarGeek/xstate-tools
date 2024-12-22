@@ -1,62 +1,193 @@
-import { test } from "vitest"
-import { act, render } from "@testing-library/react"
+import { beforeEach, describe, test } from "vitest"
+import { act, render, screen } from "@testing-library/react"
+import { userEvent } from "@testing-library/user-event"
 import { createMachineComponent } from "./index"
 import { createActor, createMachine } from "xstate"
+import { useState } from "react"
 
-const testMachine = createMachine({
-  initial: "a",
-  states: {
-    a: {
-      on: {
-        NEXT: "b",
+describe("Basic machine", () => {
+  const testMachine = createMachine({
+    initial: "a",
+    states: {
+      a: {
+        on: {
+          NEXT: "b",
+        },
+      },
+      b: {
+        on: {
+          NEXT: "c",
+        },
+      },
+      c: {
+        on: {
+          NEXT: "a",
+        },
       },
     },
-    b: {
-      on: {
-        NEXT: "c",
+  })
+
+  type TestMachine = typeof testMachine
+
+  let actorRef = createActor(testMachine)
+
+  beforeEach(() => {
+    actorRef = createActor(testMachine)
+    actorRef.start()
+  })
+  test("Can use the component field to render components", async () => {
+    const TestComponent = createMachineComponent<TestMachine>({
+      states: {
+        a: {
+          Component: () => <div>A</div>,
+        },
+        b: {
+          Component: () => <div>B</div>,
+        },
+        c: {
+          Component: () => <div>C</div>,
+        },
       },
-    },
-    c: {
-      on: {
-        NEXT: "a",
+    })
+
+    render(<TestComponent actorRef={actorRef} />)
+    screen.getByText("A")
+
+    act(() => {
+      actorRef.send({ type: "NEXT" })
+    })
+    screen.getByText("B")
+
+    act(() => {
+      actorRef.send({ type: "NEXT" })
+    })
+    screen.getByText("C")
+
+    act(() => {
+      actorRef.send({ type: "NEXT" })
+    })
+    screen.getByText("A")
+  })
+
+  test("Can use the states field to render components", async () => {
+    const TestComponent = createMachineComponent<TestMachine>({
+      states: {
+        a: () => <div>A</div>,
+        b: () => <div>B</div>,
+        c: () => <div>C</div>,
       },
-    },
-  },
+    })
+
+    const screen = render(<TestComponent actorRef={actorRef} />)
+    screen.getByText("A")
+
+    act(() => {
+      actorRef.send({ type: "NEXT" })
+    })
+    screen.getByText("B")
+
+    act(() => {
+      actorRef.send({ type: "NEXT" })
+    })
+    screen.getByText("C")
+
+    act(() => {
+      actorRef.send({ type: "NEXT" })
+    })
+    screen.getByText("A")
+  })
 })
 
-const actorRef = createActor(testMachine)
-actorRef.start()
-
-const TestComponent = createMachineComponent({
-  states: {
-    a: {
-      Component: () => <div>A</div>,
+describe("Nested machine", () => {
+  const testMachine = createMachine({
+    initial: "a",
+    states: {
+      a: {
+        on: {
+          NEXT: "d",
+        },
+        initial: "b",
+        states: {
+          b: {
+            on: {
+              innerNext: "c",
+            },
+          },
+          c: {
+            on: {
+              innerNext: "b",
+            },
+          },
+        },
+      },
+      d: {
+        on: {
+          NEXT: "a",
+        },
+      },
     },
-    b: {
-      Component: () => <div>B</div>,
-    },
-    c: {
-      Component: () => <div>C</div>,
-    },
-  },
-})
-
-test("renders the correct component", async () => {
-  const screen = render(<TestComponent actorRef={actorRef} />)
-  screen.getByText("A")
-
-  act(() => {
-    actorRef.send({ type: "NEXT" })
   })
-  screen.getByText("B")
 
-  act(() => {
-    actorRef.send({ type: "NEXT" })
-  })
-  screen.getByText("C")
+  type TestMachine = typeof testMachine
 
-  act(() => {
-    actorRef.send({ type: "NEXT" })
+  let actorRef = createActor(testMachine)
+
+  beforeEach(() => {
+    actorRef = createActor(testMachine)
+    actorRef.start()
   })
-  screen.getByText("A")
+  test("Nested states", async () => {
+    const TestComponent = createMachineComponent<TestMachine>({
+      states: {
+        a: {
+          Component: ({ children }) => {
+            const [count, setCount] = useState(0)
+            return (
+              <div>
+                <div>A {children}</div>
+                <button onClick={() => setCount(count + 1)}>Click</button>
+                <div>Count is:{count}</div>
+              </div>
+            )
+          },
+          states: {
+            b: () => <>B</>,
+            c: () => <>C</>,
+          },
+        },
+        d: () => <div>D</div>,
+      },
+    })
+
+    const { click } = userEvent.setup()
+    render(<TestComponent actorRef={actorRef} />)
+
+    screen.getByText("A B")
+    const countButton = screen.getByText('Click')
+    act(() => {
+      actorRef.send({ type: "innerNext" })
+    })
+    screen.getByText("Count is:0")
+    await click(countButton)
+    screen.getByText("Count is:1")
+    screen.getByText("A C")
+    await click(countButton)
+    screen.getByText("Count is:2")
+
+    act(() => {
+      actorRef.send({ type: "innerNext" })
+    })
+    screen.getByText("A B")
+
+    act(() => {
+      actorRef.send({ type: "NEXT" })
+    })
+    screen.getByText("D")
+
+    act(() => {
+      actorRef.send({ type: "NEXT" })
+    })
+    screen.getByText("A B")
+    screen.getByText("Count is:0")
+  })
 })

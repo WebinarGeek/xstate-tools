@@ -21,29 +21,36 @@ type NestedStateValue<
 > = Extract<TStateValue, Partial<Record<TStateKey, unknown>>>[TStateKey]
 
 // Config for a machine component. Iterates through the machines states providing a component at every level
-interface MachineComponentConfig<
+type MachineComponentConfig<
   TMachine extends AnyStateMachine,
   CurrentStateValue = StateValueFrom<TMachine>,
-> {
-  Component?: ComponentType<MachineComponentProps<TMachine>>
-  states?: [CurrentStateValue] extends [never]
-    ? never
-    : {
-        [StateValue in Extract<
-          CurrentStateValue,
-          string
-        >]?: MachineComponentConfig<
-          TMachine,
-          Exclude<NestedStateValue<CurrentStateValue, StateValue>, undefined>
-        >
-      }
-}
+> =
+  | {
+      Component?: ComponentType<MachineComponentProps<TMachine>>
+      states?: [CurrentStateValue] extends [never]
+        ? never
+        : {
+            [StateValue in Extract<
+              CurrentStateValue,
+              string
+            >]?: MachineComponentConfig<
+              TMachine,
+              Exclude<
+                NestedStateValue<CurrentStateValue, StateValue>,
+                undefined
+              >
+            >
+          }
+    }
+  | ComponentType<MachineComponentProps>
 
 // A generic machine component config that is easier to use in the createMachineComponent function
-interface GenericMachineComponentConfig {
-  Component?: ComponentType<MachineComponentProps>
-  states?: Record<string, GenericMachineComponentConfig>
-}
+type GenericMachineComponentConfig =
+  | {
+      Component?: ComponentType<MachineComponentProps>
+      states?: Record<string, GenericMachineComponentConfig>
+    }
+  | ComponentType<MachineComponentProps>
 
 /**
  * A component that renders a nested chain of components at a given state value in a machine
@@ -85,6 +92,12 @@ export const createMachineComponent = <TMachine extends AnyStateMachine>(
     // Can't make a recursive type for this but is enough to ge this deep
     currentStateValue: string | Record<string, string> | null
   } & ChildrenProp) => {
+    // If the current config is a function then it is a component
+    if (typeof currentConfig === "function") {
+      const Component = currentConfig
+      return <Component actorRef={actorRef}>{children}</Component>
+    }
+
     const { states, Component } = currentConfig
 
     if (currentStateValue) {
