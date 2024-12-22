@@ -96,6 +96,23 @@ describe("Basic machine", () => {
     })
     screen.getByText("A")
   })
+
+  test("Will forward all props to the components", () => {
+    const TestComponent = createMachineComponent<TestMachine, { foo: "bar" }>({
+      states: {
+        a: {
+          Component: ({ foo }) => <div>A {foo}</div>,
+        },
+        b: ({ foo }) => <div>B {foo}</div>,
+      },
+    })
+    const screen = render(<TestComponent actorRef={actorRef} foo="bar" />)
+    screen.getByText("A bar")
+    act(() => {
+      actorRef.send({ type: "NEXT" })
+    })
+    screen.getByText("B bar")
+  })
 })
 
 describe("Nested machine", () => {
@@ -163,7 +180,7 @@ describe("Nested machine", () => {
     render(<TestComponent actorRef={actorRef} />)
 
     screen.getByText("A B")
-    const countButton = screen.getByText('Click')
+    const countButton = screen.getByText("Click")
     act(() => {
       actorRef.send({ type: "innerNext" })
     })

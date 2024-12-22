@@ -9,9 +9,11 @@ interface ChildrenProp {
 // Props for a nested Component inside a MachineComponent
 export type MachineComponentProps<
   TMachine extends AnyStateMachine = AnyStateMachine,
+  Props extends object = object,
 > = {
   actorRef: ActorRefFrom<TMachine>
-} & ChildrenProp
+} & ChildrenProp &
+  Props
 
 // Extracts the nested state value from a root machine state
 // eg. NestedStateValue<'a' | 'd' | { a: 'b' } | { a: { b: 'c' }} | { d: 'e' }, 'a'> => { b: 'c' }
@@ -24,9 +26,10 @@ type NestedStateValue<
 type MachineComponentConfig<
   TMachine extends AnyStateMachine,
   CurrentStateValue = StateValueFrom<TMachine>,
+  Props extends object = object,
 > =
   | {
-      Component?: ComponentType<MachineComponentProps<TMachine>>
+      Component?: ComponentType<MachineComponentProps<TMachine, Props>>
       states?: [CurrentStateValue] extends [never]
         ? never
         : {
@@ -38,11 +41,12 @@ type MachineComponentConfig<
               Exclude<
                 NestedStateValue<CurrentStateValue, StateValue>,
                 undefined
-              >
+              >,
+              Props
             >
           }
     }
-  | ComponentType<MachineComponentProps>
+  | ComponentType<MachineComponentProps<TMachine, Props>>
 
 // A generic machine component config that is easier to use in the createMachineComponent function
 type GenericMachineComponentConfig =
@@ -59,9 +63,7 @@ type GenericMachineComponentConfig =
  *
  * const MyMachineComponent = createMachineComponent<MyMachine>({
  *   states: {
- *     a: {
- *       Component: () => <div>A</div>,
- *     },
+ *     a: () => <div>A</div>,
  *     b: {
  *       Component: ({ children }) => <div>B {children}</div>,
  *       states: {
@@ -78,24 +80,33 @@ type GenericMachineComponentConfig =
  * While the state value is { b: 'c' } the component will render <div>B C</div>
  * While the state value is { b: 'd' } the component will render <div>B </div>
  */
-export const createMachineComponent = <TMachine extends AnyStateMachine>(
-  config: MachineComponentConfig<TMachine>,
+export const createMachineComponent = <
+  TMachine extends AnyStateMachine,
+  Props extends object = object,
+>(
+  config: MachineComponentConfig<TMachine, StateValueFrom<TMachine>, Props>,
 ) => {
   const MachineComponentAtStateValue = ({
     actorRef,
     children,
     currentConfig = config as GenericMachineComponentConfig,
     currentStateValue,
+    ...props
   }: {
     actorRef: ActorRefFrom<AnyStateMachine>
     currentConfig?: GenericMachineComponentConfig
     // Can't make a recursive type for this but is enough to ge this deep
     currentStateValue: string | Record<string, string> | null
-  } & ChildrenProp) => {
+  } & ChildrenProp &
+    Props) => {
     // If the current config is a function then it is a component
     if (typeof currentConfig === "function") {
       const Component = currentConfig
-      return <Component actorRef={actorRef}>{children}</Component>
+      return (
+        <Component actorRef={actorRef} {...props}>
+          {children}
+        </Component>
+      )
     }
 
     const { states, Component } = currentConfig
@@ -115,11 +126,13 @@ export const createMachineComponent = <TMachine extends AnyStateMachine>(
       if (nextConfig) {
         if (Component)
           return (
-            <Component actorRef={actorRef}>
+            <Component actorRef={actorRef} {...props}>
+              {/* @ts-expect-error Work around to get the props to work */}
               <MachineComponentAtStateValue
                 actorRef={actorRef}
                 currentConfig={nextConfig}
                 currentStateValue={nextStateValue}
+                {...props}
               >
                 {children}
               </MachineComponentAtStateValue>
@@ -127,10 +140,12 @@ export const createMachineComponent = <TMachine extends AnyStateMachine>(
           )
 
         return (
+          // @ts-expect-error Work around to get the props to work
           <MachineComponentAtStateValue
             actorRef={actorRef}
             currentConfig={nextConfig}
             currentStateValue={nextStateValue}
+            {...props}
           >
             {children}
           </MachineComponentAtStateValue>
@@ -138,7 +153,12 @@ export const createMachineComponent = <TMachine extends AnyStateMachine>(
       }
     }
 
-    if (Component) return <Component actorRef={actorRef}>{children}</Component>
+    if (Component)
+      return (
+        <Component actorRef={actorRef} {...props}>
+          {children}
+        </Component>
+      )
 
     return null
   }
@@ -146,12 +166,15 @@ export const createMachineComponent = <TMachine extends AnyStateMachine>(
   const RenderWithStateValue = ({
     actorRef,
     children,
-  }: ChildrenProp & { actorRef: ActorRefFrom<AnyStateMachine> }) => {
+    ...props
+  }: ChildrenProp & { actorRef: ActorRefFrom<AnyStateMachine> } & Props) => {
     const stateValue = useSelector(actorRef, (s) => s.value)
     return (
+      // @ts-expect-error Work around to get the props to work
       <MachineComponentAtStateValue
         actorRef={actorRef}
         currentStateValue={stateValue}
+        {...props}
       >
         {children}
       </MachineComponentAtStateValue>
