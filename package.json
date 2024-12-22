@@ -5,8 +5,10 @@
   "scripts": {
     "build": "tsup packages/machine-component/src/index.tsx --format esm,cjs --dts",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "format": "prettier --write .",
-    "format-check": "prettier --check ."
+    "format:fix": "prettier --write .",
+    "format": "prettier --check .",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "repository": {
     "type": "git",
@@ -24,7 +26,15 @@
     "examples"
   ],
   "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@typescript-eslint/eslint-plugin": "^8.18.1",
+    "@typescript-eslint/parser": "^8.18.1",
     "eslint": "^9.17.0",
-    "prettier": "^3.4.2"
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-react": "^7.37.2",
+    "globals": "^15.14.0",
+    "prettier": "^3.4.2",
+    "typescript-eslint": "^8.18.1"
   }
 }
