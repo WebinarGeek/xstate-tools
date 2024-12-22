@@ -22,7 +22,8 @@
     "declaration": true,
     "declarationMap": true,
     "emitDeclarationOnly": false,
-    "composite": true
+    "composite": true,
+    "noEmit": true,
   },
   "exclude": ["node_modules"],
   "include": ["packages/**/*"]

@@ -28,59 +28,115 @@ const Component = ({ actorRef }) => {
 
 By using a `createMachineComponent` helper, you can do this in a more declarative way
 
-````tsx
-import { createMachineComponent } from "@webinargeek/machine-component";
+```tsx
+import { createMachineComponent } from "@webinargeek/machine-component"
 
 const Component = createMachineComponent<MyMachine>({
   states: {
-    a: {
-      Component: () => <div>A</div>,
-    },
-    b: {
-      Component: () => <div>B</div>,
-    },
-    c: {
-      Component: () => <div>C</div>,
-    },
+    a: () => <div>A</div>,
+    b: () => <div>B</div>,
+    c: () => <div>C</div>,
   },
-});
+})
+```
 
-## Full Example
+## Usage
+
+The `createMachineComponent` function takes a config object which mirrors the states of an xstate machine and assigns a component to any of them. This component will be rendered when an actor whose config is that machine is passed to it via props
 
 ```tsx
-import { createMachineComponent } from "@webinargeek/machine-component";
+import { createMachine } from "xstate"
+import { useActorRef } from "@xstate/react"
+import { createMachineComponent } from "@webinargeek/machine-component"
 
-const Count = createMachineComponent<CountMachine>({
+const myMachine = createMachine({
+  initial: "a",
   states: {
     a: {
-      Component: ({ actorRef }) => {
-        const count = useSelector(actorRef, (state) => state.context.count);
-
-        return (
-          <>
-            <div className="card">
-              <button onClick={() => actorRef.send({ type: "count" })}>
-                count is {count}
-              </button>
-            </div>
-            <div className="card">
-              <button onClick={() => actorRef.send({ type: "stop" })}>
-                Stop
-              </button>
-            </div>
-          </>
-        );
+      on: {
+        NEXT: "b",
       },
     },
     b: {
-      Component: ({ actorRef }) => (
-        <div className="card">
-          <button onClick={() => actorRef.send({ type: "start" })}>
-            Start
-          </button>
-        </div>
-      ),
+      on: {
+        NEXT: "c",
+      },
+    },
+    c: {
+      on: {
+        NEXT: "a",
+      },
     },
   },
-});
-````
+})
+
+type MyMachine = typeof machine
+
+const Component = createMachineComponent<MyMachine>({
+  states: {
+    a: () => <div>A</div>,
+    b: () => <div>B</div>,
+    c: () => <div>C</div>,
+  },
+})
+
+const App = () => {
+  const actorRef = useActorRef(myMachine)
+  return <Component actorRef={actorRef} />
+}
+```
+
+### Layout components
+
+A Component can be passed to the `Component` field of a parent state which will be rendered without being unmounted as the child states change.
+
+The components defined in the child states will be passed into the `children` prop.
+
+```tsx
+const Component = createMachineComponent<MyMachine>({
+  states: {
+    a: {
+      Component: () => <div>A {children}</div>,
+      states: {
+        b: () => <div>B</div>,
+        c: () => <div>C</div>,
+      },
+    },
+    d: () => <div>D</div>,
+  },
+})
+```
+
+### Prop forwarding
+
+The second generic parameter of the `createMachineComponent` function is a props object which will be forwarded to all state components.
+
+The state components will also receive the `actorRef` prop that was passed to the machine component.
+
+```tsx
+const Component = createMachineComponent<MyMachine, { foo: string }>({
+  states: {
+    a: {
+      Component: ({ foo }) => <div>A {foo}</div>,
+    },
+    b: ({ foo }) => <div>B {foo}</div>,
+    c: ({ children, actorRef }) => {
+      const context = useSelector(actorRef, (state) => state.context)
+      return <div>C {children}</div>
+    },
+  },
+})
+
+const App = ({ children }) => {
+  const actorRef = useActor(myMachine)
+  return (
+    <Component actorRef={actorRef} foo="bar">
+      {children}
+    </Component>
+  )
+}
+```
+
+### Parallel states
+
+TODO....

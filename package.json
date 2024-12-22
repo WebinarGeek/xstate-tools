@@ -3,12 +3,12 @@
   "version": "0.0.1",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsup packages/machine-component/src/index.tsx --format esm,cjs --dts",
-    "test": "vitest",
+    "build": "npm run build --workspaces",
     "format:fix": "prettier --write .",
     "format": "prettier --check .",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "test": "vitest"
   },
   "repository": {
     "type": "git",

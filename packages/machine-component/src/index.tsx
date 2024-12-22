@@ -76,6 +76,11 @@ type GenericMachineComponentConfig =
  *   }
  * })
  *
+ * const App = () => {
+ *   const actorRef = useActor(myMachine)
+ *   return <MyMachineComponent actorRef={actorRef} />
+ * }
+ *
  * While the state value is 'a' the component will render <div>A</div>
  * While the state value is { b: 'c' } the component will render <div>B C</div>
  * While the state value is { b: 'd' } the component will render <div>B </div>
@@ -127,7 +132,7 @@ export const createMachineComponent = <
         if (Component)
           return (
             <Component actorRef={actorRef} {...props}>
-              {/* @ts-expect-error Work around to get the props to work */}
+              {/* @ts-expect-error Generic props are not typed safely */}
               <MachineComponentAtStateValue
                 actorRef={actorRef}
                 currentConfig={nextConfig}
@@ -140,7 +145,7 @@ export const createMachineComponent = <
           )
 
         return (
-          // @ts-expect-error Work around to get the props to work
+          // @ts-expect-error Generic props are not typed safely
           <MachineComponentAtStateValue
             actorRef={actorRef}
             currentConfig={nextConfig}
@@ -170,7 +175,7 @@ export const createMachineComponent = <
   }: ChildrenProp & { actorRef: ActorRefFrom<AnyStateMachine> } & Props) => {
     const stateValue = useSelector(actorRef, (s) => s.value)
     return (
-      // @ts-expect-error Work around to get the props to work
+      // @ts-expect-error Generic props are not typed safely
       <MachineComponentAtStateValue
         actorRef={actorRef}
         currentStateValue={stateValue}
