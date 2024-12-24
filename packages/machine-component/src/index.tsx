@@ -30,6 +30,7 @@ type MachineComponentConfig<
 > =
   | {
       Component?: ComponentType<MachineComponentProps<TMachine, Props>>
+      Fallback?: ComponentType<MachineComponentProps<TMachine, Props>>
       states?: [CurrentStateValue] extends [never]
         ? never
         : {
@@ -48,16 +49,19 @@ type MachineComponentConfig<
     }
   | ComponentType<MachineComponentProps<TMachine, Props>>
 
-// A generic machine component config that is easier to use in the createMachineComponent function
+// A generic machine component config that is easier to use in the
+// createMachineComponent function
 type GenericMachineComponentConfig =
   | {
       Component?: ComponentType<MachineComponentProps>
+      Fallback?: ComponentType<MachineComponentProps>
       states?: Record<string, GenericMachineComponentConfig>
     }
   | ComponentType<MachineComponentProps>
 
 /**
- * A component that renders a nested chain of components at a given state value in a machine
+ * A component that renders a nested chain of components at a given state value
+ * in a machine
  *
  * @example
  *
@@ -66,12 +70,13 @@ type GenericMachineComponentConfig =
  *     a: () => <div>A</div>,
  *     b: {
  *       Component: ({ children }) => <div>B {children}</div>,
+ *       Fallback: () => <div>Fallback</div>
  *       states: {
  *         c: {
  *           Component: () => <div>C</div>,
  *         },
  *         d: {}
- *       }
+ *       },
  *     },
  *   }
  * })
@@ -84,6 +89,8 @@ type GenericMachineComponentConfig =
  * While the state value is 'a' the component will render <div>A</div>
  * While the state value is { b: 'c' } the component will render <div>B C</div>
  * While the state value is { b: 'd' } the component will render <div>B </div>
+ * While the state value is { b: 'e' } the component will render <div>B Fallback</div>
+ * While the state value is 'c' the component will render null
  */
 export const createMachineComponent = <
   TMachine extends AnyStateMachine,
@@ -104,7 +111,8 @@ export const createMachineComponent = <
     currentStateValue: string | Record<string, string> | null
   } & ChildrenProp &
     Props) => {
-    // If the current config is a function then it is a component
+    // If the current config is a function then it is a component and we know
+    // we are in a leaf node
     if (typeof currentConfig === "function") {
       const Component = currentConfig
       return (
@@ -114,8 +122,9 @@ export const createMachineComponent = <
       )
     }
 
-    const { states, Component } = currentConfig
+    const { states, Component, Fallback } = currentConfig
 
+    // If this exists we are not in a leaf node
     if (currentStateValue) {
       // IDEA: Handle parallel states and using named slots in the wrapper
       const currentStateValueKey =
@@ -128,36 +137,37 @@ export const createMachineComponent = <
           ? null
           : currentStateValue[currentStateValueKey]
 
-      if (nextConfig) {
-        if (Component)
-          return (
-            <Component actorRef={actorRef} {...props}>
-              {/* @ts-expect-error Generic props are not typed safely */}
-              <MachineComponentAtStateValue
-                actorRef={actorRef}
-                currentConfig={nextConfig}
-                currentStateValue={nextStateValue}
-                {...props}
-              >
-                {children}
-              </MachineComponentAtStateValue>
-            </Component>
-          )
-
-        return (
-          // @ts-expect-error Generic props are not typed safely
-          <MachineComponentAtStateValue
-            actorRef={actorRef}
-            currentConfig={nextConfig}
-            currentStateValue={nextStateValue}
-            {...props}
-          >
+      // Will either be the recursive return of the next state config of the
+      // Fallback if that exists
+      const child = nextConfig ? (
+        // @ts-expect-error Generic props are not typed safely
+        <MachineComponentAtStateValue
+          actorRef={actorRef}
+          currentConfig={nextConfig}
+          currentStateValue={nextStateValue}
+          {...props}
+        >
+          {children}
+        </MachineComponentAtStateValue>
+      ) : (
+        Fallback && (
+          <Fallback actorRef={actorRef} {...props}>
             {children}
-          </MachineComponentAtStateValue>
+          </Fallback>
         )
-      }
+      )
+
+      // If there is a layout component, then wrap the child with it
+      if (Component)
+        return (
+          <Component actorRef={actorRef} {...props}>
+            {child}
+          </Component>
+        )
+      return child
     }
 
+    // In a leaf node, return the value at Component if it exists
     if (Component)
       return (
         <Component actorRef={actorRef} {...props}>
