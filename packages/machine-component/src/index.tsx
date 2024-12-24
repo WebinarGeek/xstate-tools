@@ -11,6 +11,11 @@ interface ChildrenProp {
   children?: ReactNode
 }
 
+/**
+ * Empty component that will pass through children
+ */
+export const ChildComponent = ({ children }: ChildrenProp) => children
+
 // Props for a nested Component inside a MachineComponent
 export type MachineComponentProps<
   TMachine extends AnyStateMachine = AnyStateMachine,
@@ -34,9 +39,9 @@ type MachineComponentConfig<
   Props extends object = object,
 > =
   | {
-      Component?: ComponentType<MachineComponentProps<TMachine, Props>>
+      Layout?: ComponentType<MachineComponentProps<TMachine, Props>>
       Fallback?: ComponentType<MachineComponentProps<TMachine, Props>>
-      states?: [CurrentStateValue] extends [never]
+      states: [CurrentStateValue] extends [never]
         ? never
         : {
             [StateValue in Extract<
@@ -58,9 +63,9 @@ type MachineComponentConfig<
 // createMachineComponent function
 type GenericMachineComponentConfig =
   | {
-      Component?: ComponentType<MachineComponentProps>
+      Layout?: ComponentType<MachineComponentProps>
       Fallback?: ComponentType<MachineComponentProps>
-      states?: Record<string, GenericMachineComponentConfig>
+      states: Record<string, GenericMachineComponentConfig>
     }
   | ComponentType<MachineComponentProps>
 
@@ -75,12 +80,12 @@ type GenericMachineComponentConfig =
  *     a: () => <div>A</div>,
  *     b: {
  *       Component: ({ children }) => <div>B {children}</div>,
- *       Fallback: () => <div>Fallback</div>
+ *       Fallback: () => <div>Fallback</div>,
  *       states: {
  *         c: {
  *           Component: () => <div>C</div>,
  *         },
- *         d: {}
+ *         d: {},
  *       },
  *     },
  *   }
@@ -116,8 +121,7 @@ export const createMachineComponent = <
     currentStateValue: string | Record<string, string> | null
   } & ChildrenProp &
     Props) => {
-    // If the current config is a function then it is a component and we know
-    // we are in a leaf node
+    // If the current config is a function then render it
     if (typeof currentConfig === "function") {
       const Component = currentConfig
       return (
@@ -126,61 +130,51 @@ export const createMachineComponent = <
         </Component>
       )
     }
+    // This means we are in a leaf node and we should use a function component
+    // to render something
+    if (!currentStateValue) return null
 
-    const { states, Component, Fallback } = currentConfig
+    const { states, Layout, Fallback } = currentConfig
 
-    // If this exists we are not in a leaf node
-    if (currentStateValue) {
-      // IDEA: Handle parallel states and using named slots in the wrapper
-      const currentStateValueKey =
-        typeof currentStateValue === "string"
-          ? currentStateValue
-          : Object.keys(currentStateValue)[0]
-      const nextConfig = states?.[currentStateValueKey]
-      const nextStateValue =
-        typeof currentStateValue === "string"
-          ? null
-          : currentStateValue[currentStateValueKey]
+    // IDEA: Handle parallel states and using named slots in the wrapper
+    const currentStateValueKey =
+      typeof currentStateValue === "string"
+        ? currentStateValue
+        : Object.keys(currentStateValue)[0]
+    const nextConfig = states?.[currentStateValueKey]
+    const nextStateValue =
+      typeof currentStateValue === "string"
+        ? null
+        : currentStateValue[currentStateValueKey]
 
-      // Will either be the recursive return of the next state config of the
-      // Fallback if that exists
-      const child = nextConfig ? (
-        // @ts-expect-error Generic props are not typed safely
-        <MachineComponentAtStateValue
-          actorRef={actorRef}
-          currentConfig={nextConfig}
-          currentStateValue={nextStateValue}
-          {...props}
-        >
+    // Will either be the recursive return of the next state config of the
+    // Fallback if that exists
+    const child = nextConfig ? (
+      // @ts-expect-error Generic props are not typed safely
+      <MachineComponentAtStateValue
+        actorRef={actorRef}
+        currentConfig={nextConfig}
+        currentStateValue={nextStateValue}
+        {...props}
+      >
+        {children}
+      </MachineComponentAtStateValue>
+    ) : (
+      Fallback && (
+        <Fallback actorRef={actorRef} {...props}>
           {children}
-        </MachineComponentAtStateValue>
-      ) : (
-        Fallback && (
-          <Fallback actorRef={actorRef} {...props}>
-            {children}
-          </Fallback>
-        )
+        </Fallback>
       )
+    )
 
-      // If there is a layout component, then wrap the child with it
-      if (Component)
-        return (
-          <Component actorRef={actorRef} {...props}>
-            {child}
-          </Component>
-        )
-      return child
-    }
-
-    // In a leaf node, return the value at Component if it exists
-    if (Component)
+    // If there is a Layout, then wrap the child with it
+    if (Layout)
       return (
-        <Component actorRef={actorRef} {...props}>
-          {children}
-        </Component>
+        <Layout actorRef={actorRef} {...props}>
+          {child}
+        </Layout>
       )
-
-    return null
+    return child
   }
 
   const RenderWithStateValue = ({

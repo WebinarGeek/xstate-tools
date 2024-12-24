@@ -46,11 +46,8 @@ describe("Basic machine", () => {
     const TestComponent = createMachineComponent<TestMachine>({
       states: {
         a: () => <div>A</div>,
-        b: {
-          Component: () => <div>B</div>,
-        },
+        b: () => <div>B</div>,
         c: C,
-        d: {},
       },
     })
 
@@ -81,18 +78,29 @@ describe("Basic machine", () => {
   test("Will forward all props to the components", () => {
     const TestComponent = createMachineComponent<TestMachine, { foo: "bar" }>({
       states: {
-        a: {
-          Component: ({ foo }) => <div>A {foo}</div>,
-        },
-        b: ({ foo }) => <div>B {foo}</div>,
+        a: ({ foo, children }) => (
+          <div>
+            A {foo} {children}
+          </div>
+        ),
+        b: ({ foo, children }) => (
+          <div>
+            B {foo} {children}
+          </div>
+        ),
       },
     })
-    render(<TestComponent actorRef={actorRef} foo="bar" />)
-    screen.getByText("A bar")
+    render(
+      <TestComponent actorRef={actorRef} foo="bar">
+        Child
+      </TestComponent>,
+    )
+
+    screen.getByText("A bar Child")
     act(() => {
       actorRef.send({ type: "NEXT" })
     })
-    screen.getByText("B bar")
+    screen.getByText("B bar Child")
   })
 
   test("Will not umount components that are the same", async () => {
@@ -145,8 +153,7 @@ describe("Basic machine", () => {
       Fallback: ({ foo }) => <div>Fallback {foo}</div>,
       states: {
         a: () => <div>A</div>,
-        c: {},
-        d: () => null,
+        c: () => null,
       },
     })
 
@@ -159,12 +166,6 @@ describe("Basic machine", () => {
       actorRef.send({ type: "NEXT" })
     })
     screen.getByText("Fallback bar")
-
-    // Fallbacks are not rendered when a state is empty
-    act(() => {
-      actorRef.send({ type: "NEXT" })
-    })
-    expect(screen.queryByText("Fallback bar")).toBeNull()
 
     // Fallbacks are not rendered when a state component is null
     act(() => {
@@ -216,7 +217,7 @@ describe("Nested machine", () => {
     const TestComponent = createMachineComponent<TestMachine>({
       states: {
         a: {
-          Component: ({ children }) => {
+          Layout: ({ children }) => {
             const [count, setCount] = useState(0)
             return (
               <div>
@@ -273,7 +274,7 @@ describe("Nested machine", () => {
       states: {
         a: {
           Fallback: () => <>Child Fallback</>,
-          Component: ({ children }) => {
+          Layout: ({ children }) => {
             return <div>A {children}</div>
           },
           states: {
