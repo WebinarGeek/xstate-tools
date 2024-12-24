@@ -113,6 +113,51 @@ describe("Basic machine", () => {
     })
     screen.getByText("B bar")
   })
+
+  test("Will not umount components that are the same", async () => {
+    const Counter = () => {
+      const [count, setCount] = useState(0)
+      return (
+        <div>
+          <div>Count is:{count}</div>
+          <button onClick={() => setCount(count + 1)}>Click</button>
+        </div>
+      )
+    }
+    const TestComponent = createMachineComponent<TestMachine>({
+      states: {
+        a: Counter,
+        b: Counter,
+        c: () => <Counter />,
+        d: () => <Counter />,
+      },
+    })
+
+    const { click } = userEvent.setup()
+    const screen = render(<TestComponent actorRef={actorRef} />)
+
+    screen.getByText("Count is:0")
+    await click(screen.getByRole("button"))
+    screen.getByText("Count is:1")
+
+    // Component will be the same between states a and b
+    act(() => {
+      actorRef.send({ type: "NEXT" })
+    })
+    screen.getByText("Count is:1")
+
+    // Using an anonymous function will create a new component and not be preserved
+    act(() => {
+      actorRef.send({ type: "NEXT" })
+    })
+    screen.getByText("Count is:0")
+    await click(screen.getByRole("button"))
+    screen.getByText("Count is:1")
+    act(() => {
+      actorRef.send({ type: "NEXT" })
+    })
+    screen.getByText("Count is:0")
+  })
 })
 
 describe("Nested machine", () => {
