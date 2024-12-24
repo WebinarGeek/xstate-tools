@@ -11,7 +11,14 @@ export default [
     files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"],
   },
   {
-    ignores: ["node_modules", "**/dist/"],
+    ignores: [
+      "node_modules",
+      "**/dist/",
+      "eslint.config.mjs",
+      "vitest.config.ts",
+      "vitest.setup.ts",
+      "examples/eslint.config.js",
+    ],
   },
   {
     languageOptions: { globals: globals.browser },
@@ -21,7 +28,15 @@ export default [
       },
     },
   },
-  ...tseslint.configs.recommended,
+  ...tseslint.configs.recommendedTypeChecked,
+  {
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
   pluginReact.configs.flat.recommended,
   pluginReact.configs.flat["jsx-runtime"],
   pluginPrettierRecommended,

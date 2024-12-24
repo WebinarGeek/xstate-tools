@@ -1,6 +1,11 @@
 import { useSelector } from "@xstate/react"
 import { ComponentType, ReactNode } from "react"
-import { AnyStateMachine, StateValueFrom, ActorRefFrom } from "xstate"
+import {
+  AnyStateMachine,
+  StateValueFrom,
+  ActorRefFrom,
+  StateValueMap,
+} from "xstate"
 
 interface ChildrenProp {
   children?: ReactNode
@@ -183,7 +188,7 @@ export const createMachineComponent = <
     children,
     ...props
   }: ChildrenProp & { actorRef: ActorRefFrom<AnyStateMachine> } & Props) => {
-    const stateValue = useSelector(actorRef, (s) => s.value)
+    const stateValue = useSelector(actorRef, (s) => s.value as StateValueMap)
     return (
       // @ts-expect-error Generic props are not typed safely
       <MachineComponentAtStateValue

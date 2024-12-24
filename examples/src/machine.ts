@@ -1,6 +1,10 @@
 import { assign, setup } from "xstate"
 
-export const countMachine = setup({}).createMachine({
+export const countMachine = setup({
+  types: {
+    context: {} as { count: number },
+  },
+}).createMachine({
   context: {
     count: 0,
   },

@@ -41,7 +41,7 @@ describe("Basic machine", () => {
     actorRef.start()
   })
 
-  test("Can use the states field to render components", async () => {
+  test("Can use the states field to render components", () => {
     const C = () => <div>C</div>
     const TestComponent = createMachineComponent<TestMachine>({
       states: {
@@ -54,7 +54,7 @@ describe("Basic machine", () => {
       },
     })
 
-    const screen = render(<TestComponent actorRef={actorRef} />)
+    render(<TestComponent actorRef={actorRef} />)
     screen.getByText("A")
 
     act(() => {
@@ -87,7 +87,7 @@ describe("Basic machine", () => {
         b: ({ foo }) => <div>B {foo}</div>,
       },
     })
-    const screen = render(<TestComponent actorRef={actorRef} foo="bar" />)
+    render(<TestComponent actorRef={actorRef} foo="bar" />)
     screen.getByText("A bar")
     act(() => {
       actorRef.send({ type: "NEXT" })
@@ -115,7 +115,7 @@ describe("Basic machine", () => {
     })
 
     const { click } = userEvent.setup()
-    const screen = render(<TestComponent actorRef={actorRef} />)
+    render(<TestComponent actorRef={actorRef} />)
 
     screen.getByText("Count is:0")
     await click(screen.getByRole("button"))
@@ -140,7 +140,7 @@ describe("Basic machine", () => {
     screen.getByText("Count is:0")
   })
 
-  test("Can use the Fallback field to render components", async () => {
+  test("Can use the Fallback field to render components", () => {
     const TestComponent = createMachineComponent<TestMachine, { foo: "bar" }>({
       Fallback: ({ foo }) => <div>Fallback {foo}</div>,
       states: {
@@ -150,7 +150,7 @@ describe("Basic machine", () => {
       },
     })
 
-    const screen = render(<TestComponent actorRef={actorRef} foo="bar" />)
+    render(<TestComponent actorRef={actorRef} foo="bar" />)
     screen.getByText("A")
     expect(screen.queryByText("Fallback bar")).toBeNull()
 
@@ -267,7 +267,7 @@ describe("Nested machine", () => {
     screen.getByText("Count is:0")
   })
 
-  test("Fallbacks in nested states", async () => {
+  test("Fallbacks in nested states", () => {
     const TestComponent = createMachineComponent<TestMachine>({
       Fallback: () => <div>Root Fallback</div>,
       states: {
