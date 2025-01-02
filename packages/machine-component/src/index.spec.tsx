@@ -51,7 +51,7 @@ describe("Basic machine", () => {
       },
     })
 
-    render(<TestComponent actorRef={actorRef} />)
+    const {container} = render(<TestComponent actorRef={actorRef} />)
     screen.getByText("A")
 
     act(() => {
@@ -67,7 +67,7 @@ describe("Basic machine", () => {
     act(() => {
       actorRef.send({ type: "NEXT" })
     })
-    expect(screen.queryByText("C")).toBeNull()
+    expect(container.childElementCount).toBe(0)
 
     act(() => {
       actorRef.send({ type: "NEXT" })
@@ -159,7 +159,7 @@ describe("Basic machine", () => {
 
     render(<TestComponent actorRef={actorRef} foo="bar" />)
     screen.getByText("A")
-    expect(screen.queryByText("Fallback bar")).toBeNull()
+    expect(screen.queryByText("Fallback")).toBeNull()
 
     // Fallbacks are rendered when a state is not given
     act(() => {
@@ -171,7 +171,7 @@ describe("Basic machine", () => {
     act(() => {
       actorRef.send({ type: "NEXT" })
     })
-    expect(screen.queryByText("Fallback bar")).toBeNull()
+    expect(screen.queryByText("Fallback")).toBeNull()
   })
 })
 
@@ -244,10 +244,10 @@ describe("Nested machine", () => {
     act(() => {
       actorRef.send({ type: "innerNext" })
     })
+    screen.getByText("A C")
     screen.getByText("Count is:0")
     await click(countButton)
     screen.getByText("Count is:1")
-    screen.getByText("A C")
     await click(countButton)
     screen.getByText("Count is:2")
 
