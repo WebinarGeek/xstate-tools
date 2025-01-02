@@ -79,13 +79,11 @@ type GenericMachineComponentConfig =
  *   states: {
  *     a: () => <div>A</div>,
  *     b: {
- *       Component: ({ children }) => <div>B {children}</div>,
+ *       Layout: ({ children }) => <div>B {children}</div>,
  *       Fallback: () => <div>Fallback</div>,
  *       states: {
- *         c: {
- *           Component: () => <div>C</div>,
- *         },
- *         d: {},
+ *         c: () => <div>C</div>,
+ *         d: () => null,
  *       },
  *     },
  *   }
