@@ -2,11 +2,11 @@ import { beforeEach, describe, expect, test } from "vitest"
 import { act, render, screen } from "@testing-library/react"
 import { userEvent } from "@testing-library/user-event"
 import { createMachineComponent } from "./index"
-import { createActor, createMachine } from "xstate"
+import { createActor, setup } from "xstate"
 import { useState } from "react"
 
 describe("Basic machine", () => {
-  const testMachine = createMachine({
+  const testMachine = setup({}).createMachine({
     initial: "a",
     states: {
       a: {
@@ -51,7 +51,7 @@ describe("Basic machine", () => {
       },
     })
 
-    const {container} = render(<TestComponent actorRef={actorRef} />)
+    const { container } = render(<TestComponent actorRef={actorRef} />)
     screen.getByText("A")
 
     act(() => {
@@ -176,7 +176,7 @@ describe("Basic machine", () => {
 })
 
 describe("Nested machine", () => {
-  const testMachine = createMachine({
+  const testMachine = setup({}).createMachine({
     initial: "a",
     states: {
       a: {
