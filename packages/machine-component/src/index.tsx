@@ -100,7 +100,7 @@ type GenericMachineComponentConfig =
  * While the state value is { b: 'c' } the component will render <div>B C</div>
  * While the state value is { b: 'd' } the component will render <div>B </div>
  * While the state value is { b: 'e' } the component will render <div>B Fallback</div>
- * While the state value is 'c' the component will render null
+ * While the state value is 'f' the component will render null
  */
 export const createMachineComponent = <
   TMachine extends AnyStateMachine,
@@ -147,7 +147,7 @@ export const createMachineComponent = <
         ? null
         : currentStateValue[currentStateValueKey]
 
-    // Will either be the recursive return of the next state config of the
+    // Will either be the recursive return of the next state config or the
     // Fallback if that exists
     const child = nextConfig ? (
       // @ts-expect-error Generic props are not typed safely
