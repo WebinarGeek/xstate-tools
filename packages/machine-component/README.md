@@ -88,7 +88,7 @@ const App = () => {
 
 ### Layout components
 
-A Component can be passed to the `Component` field of a parent state which will be rendered without being unmounted as the child states change.
+A component can be passed to the `Layout` field of a parent state which will be rendered without being unmounted as the child states change.
 
 The components defined in the child states will be passed into the `children` prop.
 
@@ -96,7 +96,7 @@ The components defined in the child states will be passed into the `children` pr
 const Component = createMachineComponent<MyMachine>({
   states: {
     a: {
-      Component: () => <div>A {children}</div>,
+      Layout: ({ children }) => <div>A {children}</div>,
       states: {
         b: () => <div>B</div>,
         c: () => <div>C</div>,
@@ -117,7 +117,7 @@ The state components will also receive the `actorRef` prop that was passed to th
 const Component = createMachineComponent<MyMachine, { foo: string }>({
   states: {
     a: {
-      Component: ({ foo }) => <div>A {foo}</div>,
+      Layout: ({ foo }) => <div>A {foo}</div>,
     },
     b: ({ foo }) => <div>B {foo}</div>,
     c: ({ children, actorRef }) => {
