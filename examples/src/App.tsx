@@ -5,35 +5,29 @@ import { createMachineComponent } from "@webinargeek/machine-component"
 
 const Count = createMachineComponent<CountMachine>({
   states: {
-    a: {
-      Component: ({ actorRef }) => {
-        const count = useSelector(actorRef, (state) => state.context.count)
+    a: ({ actorRef }) => {
+      const count = useSelector(actorRef, (state) => state.context.count)
 
-        return (
-          <>
-            <div className="card">
-              <button onClick={() => actorRef.send({ type: "count" })}>
-                count is {count}
-              </button>
-            </div>
-            <div className="card">
-              <button onClick={() => actorRef.send({ type: "stop" })}>
-                Stop
-              </button>
-            </div>
-          </>
-        )
-      },
+      return (
+        <>
+          <div className="card">
+            <button onClick={() => actorRef.send({ type: "count" })}>
+              count is {count}
+            </button>
+          </div>
+          <div className="card">
+            <button onClick={() => actorRef.send({ type: "stop" })}>
+              Stop
+            </button>
+          </div>
+        </>
+      )
     },
-    b: {
-      Component: ({ actorRef }) => (
-        <div className="card">
-          <button onClick={() => actorRef.send({ type: "start" })}>
-            Start
-          </button>
-        </div>
-      ),
-    },
+    b: ({ actorRef }) => (
+      <div className="card">
+        <button onClick={() => actorRef.send({ type: "start" })}>Start</button>
+      </div>
+    ),
   },
 })
 
