@@ -33,7 +33,7 @@
   "bugs": {
     "url": "https://github.com/WebinarGeek/xstate-tools/issues"
   },
-  "homepage": "https://github.com/WebinarGeek/xstate-tools#readme",
+  "homepage": "https://github.com/WebinarGeek/xstate-tools/blob/main/packages/machine-component/README.md",
   "publishConfig": {
     "access": "public"
   },
