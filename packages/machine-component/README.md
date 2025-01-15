@@ -6,6 +6,9 @@
 npm install @webinar-geek/machine-component
 ```
 
+> [!IMPORTANT]
+> We are currently obtaining the @webinargeek scope on npm. Once it is approved, this package will be published under `@webinargeek/machine-component`
+
 ## Motivation
 
 When creating a react component which uses a state machine for conditional rendering based on it's states, you will have a series of if statements that for each state telling react what to render
