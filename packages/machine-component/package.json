@@ -1,5 +1,5 @@
 {
-  "name": "@webinargeek/machine-component",
+  "name": "@webinar-geek/machine-component",
   "version": "0.0.1",
   "description": "A tool for creating react components which render based on the current state of an XState state machine",
   "main": "dist/index.js",

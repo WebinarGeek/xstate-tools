@@ -3,7 +3,7 @@
 ## Installation
 
 ```bash
-npm install @webinargeek/machine-component
+npm install @webinar-geek/machine-component
 ```
 
 ## Motivation
